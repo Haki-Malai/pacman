@@ -10,24 +10,25 @@
         create: create,
         update: update
     }
-};
+}
 
-var game = new Phaser.Game(config);
+var game = new Phaser.Game(config)
 var controls;
 
 function preload ()
 {
     this.load.image('tiles', '../../assets/tiles/tileset.png')
-    this.load.tilemapTiledJSON('map', '../../assets/tiles/tileset.json')
+    this.load.tilemapTiledJSON('map', '../../assets/tiles/pacman.json')
 }
 
 function create ()
 {
     var map = this.make.tilemap({ key: 'map' })
-    var tiles = map.addTilesetImage('cybernoid', 'tiles', tileWidth=16, tileHeight=16)
+    var tiles = map.addTilesetImage('tileset', 'tiles', tileWidth=16, tileHeight=16)
     var layer = map.createLayer(0, tiles, 0, 0)
 
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+    const camera = this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+    camera.zoomTo(3)
 
     var cursors = this.input.keyboard.createCursorKeys()
     var controlConfig = {
@@ -45,3 +46,4 @@ function update (time, delta)
 {
     controls.update(delta)
 }
+//https://phaser.io/examples/v3/view/camera/follow-zoom
