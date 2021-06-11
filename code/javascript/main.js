@@ -17,7 +17,8 @@ var controls;
 
 function preload ()
 {
-    this.load.image('tiles', '../../assets/tiles/tileset.png')
+    this.load.image('tiles', '../../assets/tiles/PacMan.png')
+    this.load.image('pacman', '../../assets/sprites/fmship.png')
     this.load.tilemapTiledJSON('map', '../../assets/tiles/pacman.json')
 }
 
