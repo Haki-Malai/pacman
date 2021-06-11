@@ -19,34 +19,45 @@ function preload ()
 {
     this.load.image('tiles', '../../assets/tiles/tileset.png')
     this.load.spritesheet('pacman', '../../assets/sprites/PacMan.png', { frameWidth: 85, frameHeight: 91})
-    this.load.tilemapTiledJSON('map', '../../assets/tiles/pacman.json')
+    this.load.tilemapTiledJSON('maze', '../../assets/tiles/pacman.json')
 }
 
 function create ()
 {
-    var map = this.make.tilemap({ key: 'map' })
-    var tiles = map.addTilesetImage('tileset', 'tiles', tileWidth=16, tileHeight=16)
-    var layer = map.createLayer(0, tiles, 0, 0)
+    this.map = this.make.tilemap({ key: 'maze' })
+    this.tiles = this.map.addTilesetImage('tileset', 'tiles', tileWidth=16, tileHeight=16)
+    this.map.createLayer(0, this.tiles, 0, 0)
+    this.layer = this.map.createLayer(0, this.tiles, 0, 0)
+    
+    this.pacman = this.add.sprite(this.map.tileToWorldX(25)+10, this.map.tileToWorldY(26)+10, 'pacman')
+    this.pacman.displayWidth = 10
+    this.pacman.displayHeight = 10.5
+    
 
-    this.camera = this.camera = this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
-    this.camera.zoomTo(3)
+    this.camera = this.camera = this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+    this.camera.zoomTo(5)
+    this.cameras.main.startFollow(this.pacman, true, 0.09, 0.09)
 
-    this.pacman = this.add.sprite(285, 285, 'pacman')
-
-    var cursors = this.input.keyboard.createCursorKeys()
-    var controlConfig = {
-        camera: this.cameras.main,
-        left: cursors.left,
-        right: cursors.right,
-        up: cursors.up,
-        down: cursors.down,
-        speed: 0.5
-    }
-    controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig)
+    this.cursors = this.input.keyboard.createCursorKeys()
 }
-
 function update (time, delta)
 {
-    controls.update(delta)
+    if (this.cursors.left.isDown)
+    {
+        this.pacman.x -= 2.5
+    }
+    else if (this.cursors.right.isDown)
+    {
+        this.pacman.x += 2.5
+    }
+
+    if (this.cursors.up.isDown)
+    {
+        this.pacman.y -= 2.5
+    }
+    else if (this.cursors.down.isDown)
+    {
+        this.pacman.y += 2.5
+    }
 }
 //https://phaser.io/examples/v3/view/camera/follow-zoom
