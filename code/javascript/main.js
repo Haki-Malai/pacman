@@ -17,8 +17,8 @@ var controls;
 
 function preload ()
 {
-    this.load.image('tiles', '../../assets/tiles/PacMan.png')
-    this.load.image('pacman', '../../assets/sprites/fmship.png')
+    this.load.image('tiles', '../../assets/tiles/tileset.png')
+    this.load.spritesheet('pacman', '../../assets/sprites/PacMan.png', { frameWidth: 85, frameHeight: 91})
     this.load.tilemapTiledJSON('map', '../../assets/tiles/pacman.json')
 }
 
@@ -28,8 +28,10 @@ function create ()
     var tiles = map.addTilesetImage('tileset', 'tiles', tileWidth=16, tileHeight=16)
     var layer = map.createLayer(0, tiles, 0, 0)
 
-    const camera = this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
-    camera.zoomTo(3)
+    this.camera = this.camera = this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+    this.camera.zoomTo(3)
+
+    this.pacman = this.add.sprite(285, 285, 'pacman')
 
     var cursors = this.input.keyboard.createCursorKeys()
     var controlConfig = {
