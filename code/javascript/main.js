@@ -26,38 +26,92 @@ function create ()
 {
     this.map = this.make.tilemap({ key: 'maze' })
     this.tiles = this.map.addTilesetImage('tileset', 'tiles', tileWidth=16, tileHeight=16)
-    this.map.createLayer(0, this.tiles, 0, 0)
     this.layer = this.map.createLayer(0, this.tiles, 0, 0)
-    
+
     this.pacman = this.add.sprite(this.map.tileToWorldX(25)+10, this.map.tileToWorldY(26)+10, 'pacman')
     this.pacman.displayWidth = 10
     this.pacman.displayHeight = 10.5
     
-
+    
     this.camera = this.camera = this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
     this.camera.zoomTo(5)
     this.cameras.main.startFollow(this.pacman, true, 0.09, 0.09)
 
     this.cursors = this.input.keyboard.createCursorKeys()
+    this.pacman.moved = {
+        x : 0,
+        y : 0
+    }
+    this.pacman.direction = {
+        next : 'right',
+        current : 'right'
+    }
 }
 function update (time, delta)
 {
+
+    // After 16 moved it means that we traveled a full box
+    if (Math.abs(this.pacman.moved.y) == 16){
+        this.pacman.moved.y = 0
+    }
+    if (Math.abs(this.pacman.moved.x) == 16){
+        this.pacman.moved.x = 0
+    }
+
+    // Here the direction is set. Only one direction is saved, i don't see it necessery to save it on an array
     if (this.cursors.left.isDown)
     {
-        this.pacman.x -= 2.5
+        this.pacman.direction.next = 'left'
     }
     else if (this.cursors.right.isDown)
     {
-        this.pacman.x += 2.5
+        this.pacman.direction.next = 'right'
     }
-
-    if (this.cursors.up.isDown)
+    else if ((this.cursors.up.isDown))
     {
-        this.pacman.y -= 2.5
+        this.pacman.direction.next = 'up' 
     }
     else if (this.cursors.down.isDown)
     {
-        this.pacman.y += 2.5
+        this.pacman.direction.next = 'down' 
+    }
+
+    console.log(this.pacman.direction.current)
+    // Here we check if we can set the current direction same to the next
+    if ((this.pacman.direction.current != this.pacman.direction.next)) 
+    {
+        if (((this.pacman.direction.next == 'left') || (this.pacman.direction.next == 'right')) && (this.pacman.moved.x == 0))
+        {
+            this.pacman.direction.current = this.pacman.direction.next
+            this.pacman.moved.x = 0
+        }
+        else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0))
+        {
+            this.pacman.direction.current = this.pacman.direction.next
+            this.pacman.moved.y = 0
+        }
+        
+    }
+    
+    if (this.pacman.direction.current = 'right')
+    {
+        this.pacman.x += 1
+        this.pacman.moved.x += 1
+    }
+    else if (this.pacman.direction.current = 'left')
+    {
+        this.pacman.x -= 1
+        this.pacman.moved.x -= 1
+    }
+    // && (this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index != 3) && (this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index != 9) && (this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index != 4))
+    else if (this.pacman.direction.current = 'up')
+    {
+        this.pacman.y -= 1
+        this.pacman.moved.y -= 1
+    }
+    else if (this.pacman.direction.current = 'down')
+    {
+        this.pacman.y += 1
+        this.pacman.moved.y += 1
     }
 }
-//https://phaser.io/examples/v3/view/camera/follow-zoom
