@@ -47,6 +47,8 @@ function create ()
         current : 'right'
     }
 }
+var moving = true
+window.addEventListener("click", ()=> moving = !moving)
 function update (time, delta)
 {
 
@@ -77,25 +79,26 @@ function update (time, delta)
     }
 
     // Here we check if we can set the current direction same to the next
-        if ((this.pacman.direction.current != this.pacman.direction.next)) 
+    if ((this.pacman.direction.current != this.pacman.direction.next)) 
+    {
+        if (((this.pacman.direction.next == 'left') || (this.pacman.direction.next == 'right')) && (this.pacman.moved.x == 0) && (this.pacman.moved.y == 0))
         {
-            if (((this.pacman.direction.next == 'left') || (this.pacman.direction.next == 'right')) && (this.pacman.moved.x == 0) && (this.pacman.moved.y == 0))
-            {
-                if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
-                    this.pacman.direction.current = this.pacman.direction.next
-                    this.pacman.moved.x = 0
-                }
-            }
-            else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0) && (this.pacman.moved.x == 0))
-            {
-                if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
-                    this.pacman.direction.current = this.pacman.direction.next
-                    this.pacman.moved.y = 0
-                }
+            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
+                this.pacman.direction.current = this.pacman.direction.next
+                this.pacman.moved.x = 0
             }
         }
+        else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0) && (this.pacman.moved.x == 0))
+        {
+            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
+                this.pacman.direction.current = this.pacman.direction.next
+                this.pacman.moved.y = 0
+            }
+        }
+    }
 
-    if (canMove(this.pacman.direction.current, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
+    //console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
+    if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation)){
         if (this.pacman.direction.current == 'right')
         {
             this.pacman.x += 1
@@ -117,29 +120,41 @@ function update (time, delta)
             this.pacman.moved.y += 1
         }
     }
-
-    console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
-    function canMove(direction, tile){
-        //if (direction == 'right'){
-            //if ((tile == 3) || (tile == 9) || (tile == 4)) || (tile == 11){
+    function canMove(direction, movedY, movedX, tile, rotation){
+        if (moving == false){
+            return false
+        }
+        if (direction == 'up'){
+            if ((((tile == 3) || (tile == 4) || (tile == 9) || (tile == 1) || (tile == 18)) && (rotation == 0)) || (((tile == 9) || (tile == 10)) && (rotation > 4))){
+                if ((movedY >= -16) && (movedY < 0)){
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                return true
+            }
+        } else if (direction == 'down'){
+            //let tile = layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera)
+            return true
+            //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
                 //return false
             //} else {
                 //return true
             //}
-        //} else if (direction == 'left'){
-
-        //} else if (direction == 'down'){
-
-        //}
-        // else if (direction == 'up')
+        }// else if (direction == 'up')
         //{
-            //if ((tile == 3) || (tile == 9) || (tile == 4)) || (tile == 11){
+            //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
                 //return false
             //} else {
                 //return true
             //}
-        //} else if (direction == ''){
-
+        //} else if (direction == 'up'){
+            //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
+                //return false
+            //} else {
+                //return true
+            //}
         //}
         return true
     }
