@@ -48,49 +48,43 @@ function create ()
     }
 }
 var moving = true
-window.addEventListener("click", ()=> moving = !moving)
+window.addEventListener("click", () => moving = !moving)
 function update (time, delta)
 {
 
     // After 16 moved it means that we traveled a full box
-    if (Math.abs(this.pacman.moved.y) == 16){
+    if (Math.abs(this.pacman.moved.y) == 16) {
         this.pacman.moved.y = 0
-    }
-    if (Math.abs(this.pacman.moved.x) == 16){
+    } 
+    if (Math.abs(this.pacman.moved.x) == 16) {
         this.pacman.moved.x = 0
     }
 
-    // Here the direction is set. Only one direction is saved, i don't see it necessery to save it on an array
-    if (this.cursors.left.isDown)
-    {
+    // Here the direction is set. Only one direction is saved, i find it necessery to save it on an array
+    if (this.cursors.left.isDown) {
         this.pacman.direction.next = 'left'
     }
-    else if (this.cursors.right.isDown)
-    {
+    else if (this.cursors.right.isDown) {
         this.pacman.direction.next = 'right'
     }
-    else if ((this.cursors.up.isDown))
-    {
+    else if ((this.cursors.up.isDown)) {
         this.pacman.direction.next = 'up' 
     }
-    else if (this.cursors.down.isDown)
-    {
+    else if (this.cursors.down.isDown) {
         this.pacman.direction.next = 'down' 
     }
 
     // Here we check if we can set the current direction same to the next
-    if ((this.pacman.direction.current != this.pacman.direction.next)) 
+    if (this.pacman.direction.current != this.pacman.direction.next) 
     {
-        if (((this.pacman.direction.next == 'left') || (this.pacman.direction.next == 'right')) && (this.pacman.moved.x == 0) && (this.pacman.moved.y == 0))
-        {
-            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
+        if ((this.pacman.direction.next == 'left' || this.pacman.direction.next == 'right') && this.pacman.moved.x == 0 && this.pacman.moved.y == 0) {
+            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)) {
                 this.pacman.direction.current = this.pacman.direction.next
                 this.pacman.moved.x = 0
             }
         }
-        else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0) && (this.pacman.moved.x == 0))
-        {
-            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)){
+        else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0) && (this.pacman.moved.x == 0)) {
+            if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)) {
                 this.pacman.direction.current = this.pacman.direction.next
                 this.pacman.moved.y = 0
             }
@@ -98,35 +92,32 @@ function update (time, delta)
     }
 
     //console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
-    if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation)){
-        if (this.pacman.direction.current == 'right')
-        {
+    if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation)) {
+        if (this.pacman.direction.current == 'right') {
             this.pacman.x += 1
             this.pacman.moved.x += 1
         }
-        else if (this.pacman.direction.current == 'left')
-        {
+        else if (this.pacman.direction.current == 'left') {
             this.pacman.x -= 1
             this.pacman.moved.x -= 1
         }
-        else if (this.pacman.direction.current == 'up')
-        {
+        else if (this.pacman.direction.current == 'up') {
             this.pacman.y -= 1
             this.pacman.moved.y -= 1
         }
-        else if (this.pacman.direction.current == 'down')
-        {
+        else if (this.pacman.direction.current == 'down') {
             this.pacman.y += 1
             this.pacman.moved.y += 1
         }
     }
-    function canMove(direction, movedY, movedX, tile, rotation){
-        if (moving == false){
+    function canMove(direction, movedY, movedX, tile, rotation) {
+        console.log(tile)
+        if (moving == false) {
             return false
         }
-        if (direction == 'up'){
-            if ((((tile == 3) || (tile == 4) || (tile == 9) || (tile == 1) || (tile == 18)) && (rotation == 0)) || (((tile == 9) || (tile == 10)) && (rotation > 4))){
-                if ((movedY >= -16) && (movedY < 0)){
+        if (direction == 'up') {
+            if ((((tile == 3) || (tile == 4) || (tile == 9) || (tile == 1) || (tile == 18)) && (rotation == 0)) || (((tile == 9) || (tile == 10)) && (rotation > 4))) {
+                if ((movedY >= -16) && (movedY < 0)) {
                     return true
                 } else {
                     return false
@@ -134,7 +125,7 @@ function update (time, delta)
             } else {
                 return true
             }
-        } else if (direction == 'down'){
+        } else if (direction == 'down') {
             //let tile = layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera)
             return true
             //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
