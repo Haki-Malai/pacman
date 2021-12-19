@@ -72,9 +72,20 @@
                 }
             }
         }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FINISH THIS! ! ! ! ! !  ! ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const pacmanTiles = {
+            current = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
+            currentRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
+            left = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
+            leftRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
+            down = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
+            downRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
+        }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
         
         //console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
-        if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation)) {
+        if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, pacmanTiles)) {
             if (this.pacman.direction.current == 'right') {
                 this.pacman.x += 1
                 this.pacman.moved.x += 1
