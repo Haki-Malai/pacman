@@ -106,7 +106,7 @@
                 return false
             }
             if (direction == 'up') {
-                if (((collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 9 || collisionTiles.current == 1 || collisionTiles.current == 18) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 9 || collisionTiles.current == 10) && collisionTiles.currentRotation > 4)) {
+                if (((collisionTiles.current == 1 || collisionTiles.current == 2 || collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 9 || collisionTiles.current == 18 || collisionTiles.current == 23) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 9 || collisionTiles.current == 10) && collisionTiles.currentRotation > 4)) {
                     if ((movedY >= -16) && (movedY < 0)) {
                         return true
                     } else {
@@ -126,7 +126,7 @@
                     return true
                 }
             } else if (direction == 'right') {
-                if (((collisionTiles.right == 1 || collisionTiles.right == 15 || collisionTiles.right == 24) && collisionTiles.rightRotation == 0) || ((collisionTiles.right == 3 || collisionTiles.right == 4 || collisionTiles.right == 10 || collisionTiles.right == 18) && collisionTiles.rightRotation > 4)) {
+                if (((collisionTiles.right == 1 || collisionTiles.right == 15 || collisionTiles.right == 24) && collisionTiles.rightRotation == 0) || ((collisionTiles.right == 3 || collisionTiles.right == 4 || collisionTiles.right == 10 || collisionTiles.right == 18 || collisionTiles.right == 23) && collisionTiles.rightRotation > 4)) {
                     if ((movedX <= 16) && (movedX > 0)) {
                         return true
                     } else {
