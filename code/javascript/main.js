@@ -32,6 +32,9 @@
             next : 'right',
             current : 'right'
         }
+        this.pacman.y -= 16*-1
+        this.pacman.x += 16*4
+        console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
         
     }
     update(time, delta) {
@@ -57,35 +60,33 @@
             this.pacman.direction.next = 'down' 
         }
         
+        // Those are needed for checking collision
+        var collisionTiles = {
+            current : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index,
+            currentRotation : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation,
+            left : this.layer.getTileAtWorldXY(this.pacman.x - 16, this.pacman.y, true, this.camera).index,
+            leftRotation : this.layer.getTileAtWorldXY(this.pacman.x - 16, this.pacman.y, true, this.camera).rotation,
+            down : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y + 16, true, this.camera).index,
+            downRotation : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y + 16, true, this.camera).rotation
+        }
+        
         // Here we check if we can set the current direction same to the next
         if (this.pacman.direction.current != this.pacman.direction.next) {
             if ((this.pacman.direction.next == 'left' || this.pacman.direction.next == 'right') && this.pacman.moved.x == 0 && this.pacman.moved.y == 0) {
-                if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)) {
+                if (canMove(this.pacman.direction.next, this.pacman.moved.y, this.pacman.moved.x, collisionTiles)) {
                     this.pacman.direction.current = this.pacman.direction.next
                     this.pacman.moved.x = 0
                 }
             }
             else if (((this.pacman.direction.next == 'up') || (this.pacman.direction.next == 'down')) && (this.pacman.moved.y == 0) && (this.pacman.moved.x == 0)) {
-                if (canMove(this.pacman.direction.next, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)) {
+                if (canMove(this.pacman.direction.next, this.pacman.moved.y, this.pacman.moved.x, collisionTiles)) {
                     this.pacman.direction.current = this.pacman.direction.next
                     this.pacman.moved.y = 0
                 }
             }
         }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FINISH THIS! ! ! ! ! !  ! ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        const pacmanTiles = {
-            current = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
-            currentRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
-            left = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
-            leftRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
-            down = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index
-            downRotation = this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation
-        }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-        
-        //console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).rotation, this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
-        if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, pacmanTiles)) {
+        if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, collisionTiles)) {
             if (this.pacman.direction.current == 'right') {
                 this.pacman.x += 1
                 this.pacman.moved.x += 1
@@ -104,12 +105,12 @@
             }
         }
         
-        function canMove(direction, movedY, movedX, tile, rotation) {
+        function canMove(direction, movedY, movedX, collisionTiles) {
             if (moving == false) {
                 return false
             }
             if (direction == 'up') {
-                if ((((tile == 3) || (tile == 4) || (tile == 9) || (tile == 1) || (tile == 18)) && (rotation == 0)) || (((tile == 9) || (tile == 10)) && (rotation > 4))) {
+                if (((collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 9 || collisionTiles.current == 1 || collisionTiles.current == 18) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 9 || collisionTiles.current == 10) && collisionTiles.currentRotation > 4)) {
                     if ((movedY >= -16) && (movedY < 0)) {
                         return true
                     } else {
@@ -119,29 +120,19 @@
                     return true
                 }
             } else if (direction == 'down') {
-                //let tile = layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera)
+                if (((collisionTiles.down == 3 || collisionTiles.down == 4 || collisionTiles.down == 15 || collisionTiles.down == 16 || collisionTiles.down == 18 || collisionTiles.down == 1 || collisionTiles.down == 24 || collisionTiles.down == 25 || collisionTiles.down == 26 || collisionTiles.down == 27 || collisionTiles.down == 28) && collisionTiles.downRotation == 0) || ((collisionTiles.down == 9 || collisionTiles.down == 10) && collisionTiles.downRotation > 4)) {
+                    if ((movedY <= 16) && (movedY > 0)) {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    return true
+                }
+            } else {
                 return true
-                //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
-                    //return false
-                    //} else {
-                        //return true
-                        //}
-                    }// else if (direction == 'up')
-                    //{
-                        //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
-                            //return false
-                            //} else {
-                                //return true
-                                //}
-                                //} else if (direction == 'up'){
-                                    //if ((tile == 3) || (tile == 9) || (tile == 4) || (tile == 11)){
-                                        //return false
-                                        //} else {
-                                            //return true
-                                            //}
-                                            //}
-                                            return true
-                                        }
+            }
+        }
     }
 }
 
