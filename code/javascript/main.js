@@ -32,9 +32,6 @@
             next : 'right',
             current : 'right'
         }
-        this.pacman.x += 16*6
-        this.pacman.y += 16*-22
-        console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index,this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y + 16, true, this.camera).rotation )
     }
     update(time, delta) {
         // After 16 moved it means that we traveled a full box
@@ -138,14 +135,6 @@
                 } else {
                     return true
                 }
-                
-                // 4.7 10
-                // 4.7  3
-                // 4.7 18
-                //  0   4
-                //  0   1
-                //  0  28
-                //  0  16
             } else if (direction == 'left') {
                 if (((collisionTiles.current == 1 || collisionTiles.current == 16 || collisionTiles.current == 28) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 10 || collisionTiles.current == 18) && collisionTiles.currentRotation > 4)) {
                     if ((movedX >= -16) && (movedX < 0)) {
