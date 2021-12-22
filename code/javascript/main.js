@@ -21,20 +21,22 @@
         this.pacman.displayWidth = 10
         this.pacman.displayHeight = 10.5
 
-        
         this.points = []
         for (let i = 2; i <= 48; i++) {
+            var temp = []
             for (let j = 2; j <=48; j++) {
                 if (i != 25 || j != 26) {
                     if (shouldAddPoint(this.layer.getTileAt(i, j))) {
-                        var temp = this.add.image(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point')
-                        temp = temp.addListener()
+                        temp.push(this.physics.add.image(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point'))
                         temp.displayHeight = 2
-                        temp.displayWidth = 2
+                        this.displayWidth = 2                               //<=FIX HERE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                        this.physics.add.overlap(this.pacman, temp, () => {temp.destroy()})
                     }
                 }
             }
         }
+
         this.camera = this.camera = this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.camera.zoomTo(5)
         this.cameras.main.startFollow(this.pacman, true, 0.09, 0.09)
@@ -185,6 +187,12 @@ const config = {
     height: window.innerHeight,
     backgroundColor: '#2d2d2d',
     parent: 'phaser-example',
+    physics: {
+        default: 'arcade', //impact
+        arcade: {
+            gravity: 0
+        }
+    },
     pixelArt: true,
     scene: [ Game ]
 }
