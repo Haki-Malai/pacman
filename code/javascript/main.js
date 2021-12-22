@@ -4,26 +4,43 @@
     }
     
     preload() {
-        this.load.image('tiles', '../../assets/tiles/tileset.png')
+        this.load.image('tiles', '../../assets/mazes/default/tileset.png')
+        this.load.image('point', '../../assets/sprites/Point.png')
         this.load.spritesheet('pacman', '../../assets/sprites/PacMan.png', { frameWidth: 85, frameHeight: 91})
-        this.load.tilemapTiledJSON('maze', '../../assets/tiles/pacman.json')
+        this.load.tilemapTiledJSON('maze', '../../assets/mazes/default/pacman.json')
+        this.load.json('levelData', '../../assets/mazes/default/data.json')
     }
 
     create() {
         this.map = this.make.tilemap({ key: 'maze' })
         this.tiles = this.map.addTilesetImage('tileset', 'tiles', this.tileWidth=16, this.tileHeight=16)
         this.layer = this.map.createLayer(0, this.tiles, 0, 0)
+        this.levelData = this.cache.json.get('levelData')
         
-        this.pacman = this.add.sprite(this.map.tileToWorldX(25)+10, this.map.tileToWorldY(26)+10, 'pacman')
+        this.pacman = this.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+10, this.map.tileToWorldY(this.levelData.startsYAt)+9.5, 'pacman')
         this.pacman.displayWidth = 10
         this.pacman.displayHeight = 10.5
+
         
-        
+        this.points = []
+        for (let i = 2; i <= 48; i++) {
+            for (let j = 2; j <=48; j++) {
+                if (i != 25 || j != 26) {
+                    if (shouldAddPoint(this.layer.getTileAt(i, j))) {
+                        var temp = this.add.image(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point')
+                        temp = temp.addListener()
+                        temp.displayHeight = 2
+                        temp.displayWidth = 2
+                    }
+                }
+            }
+        }
         this.camera = this.camera = this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.camera.zoomTo(5)
         this.cameras.main.startFollow(this.pacman, true, 0.09, 0.09)
         
         this.cursors = this.input.keyboard.createCursorKeys()
+
         this.pacman.moved = {
             x : 0,
             y : 0
@@ -31,6 +48,14 @@
         this.pacman.direction = {
             next : 'right',
             current : 'right'
+        }
+
+        function shouldAddPoint(tile) {
+            if ((tile.index != 15 || tile.rotation !=0) && (tile.index != 16 || tile.rotation !=0) && (tile.index != 24 || tile.rotation !=0) && (tile.index != 25 || tile.rotation !=0) && (tile.index != 26 || tile.rotation !=0) && (tile.index != 27 || tile.rotation !=0) && (tile.index != 28 || tile.rotation !=0)){
+                return true
+            } else {
+                return false
+            }
         }
     }
     update(time, delta) {
@@ -106,7 +131,7 @@
                 return false
             }
             if (direction == 'up') {
-                if (((collisionTiles.current == 1 || collisionTiles.current == 2 || collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 9 || collisionTiles.current == 18 || collisionTiles.current == 23) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 9 || collisionTiles.current == 10) && collisionTiles.currentRotation > 4)) {
+                if (((collisionTiles.current == 1 || collisionTiles.current == 3 || collisionTiles.current == 4 || collisionTiles.current == 9 || collisionTiles.current == 18 || collisionTiles.current == 23) && collisionTiles.currentRotation == 0) || ((collisionTiles.current == 9 || collisionTiles.current == 10) && collisionTiles.currentRotation > 4)) {
                     if ((movedY >= -16) && (movedY < 0)) {
                         return true
                     } else {
