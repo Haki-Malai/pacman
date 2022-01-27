@@ -17,25 +17,29 @@
         this.layer = this.map.createLayer(0, this.tiles, 0, 0);
         this.levelData = this.cache.json.get('levelData');
         
-        this.pacman = this.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+10, this.map.tileToWorldY(this.levelData.startsYAt)+9.5, 'pacman');
+        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+10, this.map.tileToWorldY(this.levelData.startsYAt)+9.5, 'pacman');
         this.pacman.displayWidth = 10;
         this.pacman.displayHeight = 10.5;
 
-        this.points = [];
+        this.points = this.physics.add.group({
+            key: "point"
+        });
+        this.points.enableBody = true;
+
         for (let i = 2; i <= 48; i++) {
-            var temp = [];
+            var tempArray = [];
             for (let j = 2; j <=48; j++) {
                 if (i != 25 || j != 26) {
                     if (shouldAddPoint(this.layer.getTileAt(i, j))) {
-                        temp.push(this.physics.add.image(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point'));
-                        temp.displayHeight = 0.1;
-                        this.displayWidth = 0.1;                    //<=FIX HERE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-                        this.physics.add.overlap(this.pacman, temp, () => {temp.destroy()});
+                        var temp = this.points.create(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point');
+                        temp.displayHeight = 2.5;
+                        temp.displayWidth = 2.5;
                     }
                 }
             }
         }
+
+        this.physics.add.overlap(this.pacman, this.points, eatPoint, null, this);
 
         this.camera = this.camera = this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.camera.zoomTo(5);
@@ -58,6 +62,10 @@
             } else {
                 return false;
             }
+        }
+
+        function eatPoint(pacman, point) {
+            point.disableBody(true, true);
         }
     }
     update(time, delta) {
