@@ -1,4 +1,5 @@
 {
 	"startsXAt" : 25,
-	"startsYAt" : 26
+	"startsYAt" : 26,
+	"pointTypesGrid" : []
 }
