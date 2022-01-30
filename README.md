@@ -12,3 +12,5 @@ The code is written in such a way that it is easy to make another level even for
 - [ ] Display Score, Multipliers, Lifes etc.
 - [ ] Highscores
 - [ ] Multiple levels
+## To-Do Specialized List
+- [ ] Make Clearer Animation
