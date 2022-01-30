@@ -4,7 +4,7 @@
     }
     
     preload() {
-        this.load.image('tiles', '../../assets/mazes/default/tileset.png');
+        this.load.image('tiles', '../../assets/sprites/tileset.png');
         this.load.image('point', '../../assets/sprites/Point.png');
         this.load.image('banana', '../../assets/sprites/Banana.png');
         this.load.image('cherry', '../../assets/sprites/Cherry.png');
@@ -35,47 +35,56 @@
         }
         
         // Animation sets
+
         this.anims.create({
             key: 'eat',
-            frames: this.anims.generateFrameNumbers('pacman', { frames: [0, 1, 2, 3, 2, 1, 0] }),
-            frameRate: 18,
+            //frames: this.anims.generateFrameNumbers('pacman', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0] }),
+            frames: this.anims.generateFrameNames('pacman', {start: 0, end: 3}),
+            yoyo: true,
+            frameRate: 16
         });
 
         this.points = this.physics.add.group();
 
         for (let i = 2; i < this.levelData.pointTypesGrid.length+1; i++) {
             for (let j = 2; j < this.levelData.pointTypesGrid[0].length+1; j++) {
-                if (i != this.levelData.startsXAt || j != this.levelData.startsYAt) {
-                    if (shouldAddPoint(this.layer.getTileAt(i, j))) {
-                        if (this.levelData.pointTypesGrid[i-2][j-2] === 0) {
-                            var temp = this.points.create(this.map.tileToWorldX(i)+10, this.map.tileToWorldY(j)+10, 'point');
+                if (shouldAddPoint(this.layer.getTileAt(j, i), j, i, this.levelData)) {
+                    switch (this.levelData.pointTypesGrid[i-2][j-2]) {
+                        case 0:
+                            var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'point');
                             temp.displayHeight = 2.5;
                             temp.displayWidth = 2.5;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 1) {
+                            break;
+                        case 1:
                             var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'point');
                             temp.displayHeight = 4;
                             temp.displayWidth = 4;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 2) {
-                            var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'banana');
-                            temp.displayHeight = 4;
-                            temp.displayWidth = 4;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 3) {
+                            break;
+                        case 2:
                             var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'cherry');
                             temp.displayHeight = 4;
                             temp.displayWidth = 4;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 4) {
-                            var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'pear');
-                            temp.displayHeight = 4;
-                            temp.displayWidth = 4;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 5) {
+                            break;
+                        case 3:
                             var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'strawberry');
                             temp.displayHeight = 4;
                             temp.displayWidth = 4;
-                        }else if (this.levelData.pointTypesGrid[i-2][j-2] === 6) {
+                            break;
+                        case 4:
+                            var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'banana');
+                            temp.displayHeight = 4;
+                            temp.displayWidth = 4;
+                            break;
+                        case 5:
+                            var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'pear');
+                            temp.displayHeight = 4;
+                            temp.displayWidth = 4;
+                            break;
+                        case 6:
                             var temp = this.points.create(this.map.tileToWorldX(j)+10, this.map.tileToWorldY(i)+10, 'heart');
                             temp.displayHeight = 4;
                             temp.displayWidth = 4;
-                        }
+                            break;
                     }
                 }
             }
@@ -90,9 +99,10 @@
         this.cursors = this.input.keyboard.createCursorKeys();
 
 
-        function shouldAddPoint(tile) {
+        function shouldAddPoint(tile, x, y, levelData) {
             if ((tile.index != 15 || tile.rotation !=0) && (tile.index != 16 || tile.rotation !=0) && (tile.index != 24 || tile.rotation !=0) && (tile.index != 25 || tile.rotation !=0) && (tile.index != 26 || tile.rotation !=0) && (tile.index != 27 || tile.rotation !=0) && (tile.index != 28 || tile.rotation !=0)){
-                return true;
+                if (x != levelData.startsXAt || y != levelData.startsYAt) 
+                    return true;
             } else {
                 return false;
             }
