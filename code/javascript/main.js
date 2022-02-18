@@ -35,7 +35,6 @@
         }
         
         // Animation sets
-
         this.anims.create({
             key: 'eat',
             //frames: this.anims.generateFrameNumbers('pacman', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0] }),
@@ -259,6 +258,10 @@ const config = {
         arcade: {
             gravity: 0
         }
+    },
+    fps: {
+        target: 60,
+        forceSetTimeOut: true
     },
     pixelArt: true,
     scene: [ Game ]
