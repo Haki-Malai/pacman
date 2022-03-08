@@ -4,7 +4,7 @@
     }
     
     preload() {
-        this.load.image('tiles', '../../assets/sprites/tileset.png');
+        this.load.image('tiles', '../../assets/sprites/Tileset.png');
         this.load.image('point', '../../assets/sprites/Point.png');
         this.load.image('banana', '../../assets/sprites/Banana.png');
         this.load.image('cherry', '../../assets/sprites/Cherry.png');
@@ -12,32 +12,47 @@
         this.load.image('pear', '../../assets/sprites/Pear.png');
         this.load.image('strawberry', '../../assets/sprites/Strawberry.png');
         this.load.spritesheet('pacman', '../../assets/sprites/PacMan.png', { frameWidth: 85, frameHeight: 91});
+        this.load.spritesheet('blinky', '../../assets/sprites/Blinky.png', { frameWidth: 85, frameHeight: 91});
         this.load.tilemapTiledJSON('maze', '../../assets/mazes/default/pacman.json');
         this.load.json('levelData', '../../assets/mazes/default/data.json');
     }
 
     create() {
+        const SPRITE_WIDTH = 10;
+        const SPRITE_HEIGHT = 10;
         this.map = this.make.tilemap({ key: 'maze' });
         this.tiles = this.map.addTilesetImage('tileset', 'tiles', this.tileWidth=16, this.tileHeight=16);
         this.layer = this.map.createLayer(0, this.tiles, 0, 0);
         this.levelData = this.cache.json.get('levelData');
         
-        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+10, this.map.tileToWorldY(this.levelData.startsYAt)+10, 'pacman');
-        this.pacman.displayWidth = 10;
-        this.pacman.displayHeight = 10.5;
+        // Pacman sprite
+        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt)+SPRITE_HEIGHT, 'pacman');
+        this.pacman.displayWidth = SPRITE_WIDTH;
+        this.pacman.displayHeight = SPRITE_HEIGHT;
         this.pacman.moved = {
             x : 0,
             y : 0
-        }
+        };
         this.pacman.direction = {
             next : 'right',
             current : 'right'
-        }
+        };
+        
+        // Ghost sprites
+        this.blinky = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.prisonStartX)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, 'blinky');
+        this.blinky.displayWidth = SPRITE_WIDTH+1;
+        this.blinky.displayHeight = SPRITE_HEIGHT+1;
+        this.blinky.moved = {
+            x : 0,
+            y : 0,
+            lockedUp : true,
+            dead : false
+        };
+        this.blinky.direction = 'right';
         
         // Animation sets
         this.anims.create({
             key: 'eat',
-            //frames: this.anims.generateFrameNumbers('pacman', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0] }),
             frames: this.anims.generateFrameNames('pacman', {start: 0, end: 3}),
             yoyo: true,
             frameRate: 16
