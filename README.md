@@ -6,10 +6,11 @@ To try it out for now there is no installation or anything but you need npm and 
 The code is written with scalability in mind. For example, someone can make a new level with a .tmx and a .json files (the one that is already contained) that can be produced with the use of the software 'Tiled' and the '/assets/sprites/tileset.png', along with a json file in whitch there are (for now manually) written the points array and the starting axes of pacman.
 ## To-Do List
 - [x] Draw Ghosts
-- [ ] Add Ghosts etc.
+- [ ] Make static OOP functions in seperate file
+- [ ] Add Ghosts etc
 - [ ] Menu
 - [ ] Sound
-- [ ] Display Score, Multipliers, Lifes etc.
+- [ ] Display Score, Multipliers, Lifes etc
 - [ ] Highscores
 - [ ] Multiple levels
 ## To-Do Specialized List
