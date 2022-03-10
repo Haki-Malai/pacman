@@ -25,7 +25,7 @@
         const SPRITE_HEIGHT = 10;
         this.map = this.make.tilemap({ key: 'maze' });
         this.tiles = this.map.addTilesetImage('tileset', 'tiles', this.tileWidth=16, this.tileHeight=16);
-        this.layer = this.map.createLayer(0, this.tiles, 0, 0);
+        this.layer = this.map.createLayer(0, this.tiles, 0, 0).setDepth(1);
         this.levelData = this.cache.json.get('levelData');
         
         // Pacman sprite
@@ -48,7 +48,7 @@
             yoyo: true,
             frameRate: 16
         });
-        
+
         this.anims.create({
             key: 'inkyIdle',
             frames: this.anims.generateFrameNames('inky', {start: 0, end: 7}),
@@ -56,7 +56,6 @@
             frameRate: 4,
             repeat: -1
         });
-        
         this.anims.create({
             key: 'clydeIdle',
             frames: this.anims.generateFrameNames('clyde', {start: 0, end: 7}),
@@ -64,7 +63,6 @@
             frameRate: 4,
             repeat: -1
         });
-        
         this.anims.create({
             key: 'pinkyIdle',
             frames: this.anims.generateFrameNames('pinky', {start: 0, end: 7}),
@@ -72,7 +70,6 @@
             frameRate: 4,
             repeat: -1
         });
-        
         this.anims.create({
             key: 'blinkyIdle',
             frames: this.anims.generateFrameNames('blinky', {start: 0, end: 7}),
@@ -96,7 +93,8 @@
             } else {
                 var tempKey = 'blinky';
             }
-            var temp = this.physics.add.sprite(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
+            // Use temp for temporary holder for the sprite
+            var temp = this.ghosts.create(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
             temp.displayWidth = SPRITE_WIDTH + 1;
             temp.displayHeight = SPRITE_HEIGHT + 1;
             temp.moved = {
@@ -111,7 +109,7 @@
             } else {
                 temp.direction = 'left';
             }
-        }
+        };
 
         this.points = this.physics.add.group();
 
@@ -157,7 +155,7 @@
                     }
                 }
             }
-        }
+        };
 
         this.physics.add.overlap(this.pacman, this.points, eatPoint, null, this);
 
@@ -177,7 +175,7 @@
             }
         }
 
-        function eatPoint(pacman, point) {
+        function eatPoint(point) {
             point.disableBody(true, true);
             this.pacman.play('eat');
         }
@@ -187,37 +185,34 @@
         if (this.pacman.direction.current === 'right') {
             this.pacman.angle = 0;
             if (this.pacman.flipY) this.pacman.flipY = false; 
-        }else if (this.pacman.direction.current === 'left' && this.pacman.angle != -180) {
+        } else if (this.pacman.direction.current === 'left' && this.pacman.angle != -180) {
             this.pacman.angle = 180;
             if (!this.pacman.flipY) this.pacman.flipY = true; 
         }
         if (this.pacman.direction.current === 'up' && this.pacman.angle != -90) {
             this.pacman.angle = -90;
-        }else if (this.pacman.direction.current === 'down' && this.pacman.angle != 90) {
+        } else if (this.pacman.direction.current === 'down' && this.pacman.angle != 90) {
             this.pacman.angle = 90;
-        }
+        };
 
         // After 16 moved it means that we traveled a full box
         if (Math.abs(this.pacman.moved.y) === 16) {
             this.pacman.moved.y = 0;
-        } 
+        };
         if (Math.abs(this.pacman.moved.x) === 16) {
             this.pacman.moved.x = 0;
-        }
+        };
         
         // Here the direction is set. Only one direction is saved, i find it necessery to save it on an array
         if (this.cursors.left.isDown) {
             this.pacman.direction.next = 'left';
-        }
-        else if (this.cursors.right.isDown) {
+        } else if (this.cursors.right.isDown) {
             this.pacman.direction.next = 'right';
-        }
-        else if ((this.cursors.up.isDown)) {
+        } else if ((this.cursors.up.isDown)) {
             this.pacman.direction.next = 'up';
-        }
-        else if (this.cursors.down.isDown) {
+        } else if (this.cursors.down.isDown) {
             this.pacman.direction.next = 'down'; 
-        }
+        };
         
         // Those are needed for checking collision
         var collisionTiles = {
