@@ -29,7 +29,7 @@
         this.levelData = this.cache.json.get('levelData');
         
         // Pacman sprite
-        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt)+SPRITE_HEIGHT, 'pacman');
+        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt)+SPRITE_HEIGHT, 'pacman').setDepth(2);
         this.pacman.displayWidth = SPRITE_WIDTH;
         this.pacman.displayHeight = SPRITE_HEIGHT;
         this.pacman.moved = {
@@ -79,9 +79,10 @@
         });
 
         // Ghost sprites
-        this.ghosts = this.physics.add.group();
-        const divideBy4 = this.levelData.amountOfGhosts/4; // So there are almost the same amount of ghosts from a certain type
-        for (let i = 0; i < this.levelData.amountOfGhosts; i++) {
+        this.ghostGroup = this.physics.add.group();
+        this.ghosts = new Array(this.levelData.amountOfGhosts)
+        const divideBy4 = this.ghosts.length/4; // So there are almost the same amount of ghosts from a certain type
+        for (let i = 0; i < this.ghosts.length; i++) {
             // Find random box in prison
             var randomIntegerTemp = Math.floor(Math.random() * (this.levelData.prisonEndX - this.levelData.prisonStartX)) + this.levelData.prisonStartX;
             if (i < divideBy4) {
@@ -94,12 +95,14 @@
                 var tempKey = 'blinky';
             }
             // Use temp for temporary holder for the sprite
-            var temp = this.ghosts.create(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
+            var temp = this.ghostGroup.create(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
             temp.displayWidth = SPRITE_WIDTH + 1;
             temp.displayHeight = SPRITE_HEIGHT + 1;
             temp.moved = {
                 x : 0,
-                y : 0,
+                y : 0
+            };
+            temp.state = {
                 lockedUp : true,
                 dead : false
             };
@@ -109,6 +112,7 @@
             } else {
                 temp.direction = 'left';
             }
+            this.ghosts[i] = temp;
         };
 
         this.points = this.physics.add.group();
@@ -175,12 +179,65 @@
             }
         }
 
-        function eatPoint(point) {
+        function eatPoint(pacman, point) { // Don't remove 'pacman' even if it's unused
             point.disableBody(true, true);
             this.pacman.play('eat');
         }
     }
     update(time, delta) {
+        // Moves the ghosts
+        for (let i = 0; i < this.ghosts.length; i++){
+            var collisionTiles = {
+                current : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).index,
+                currentRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).rotation,
+                right : this.layer.getTileAtWorldXY(this.ghosts[i].x + 16, this.ghosts[i].y, true, this.camera).index,
+                rightRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x + 16, this.ghosts[i].y, true, this.camera).rotation,
+                down : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).index,
+                downRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).rotation
+            };
+        
+            if (canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles)) {
+                if (this.ghosts[i].direction === 'right') {
+                    this.ghosts[i].x += 1;
+                    this.ghosts[i].moved.x += 1;
+                }
+                else if (this.ghosts[i].direction === 'left') {
+                    this.ghosts[i].x -= 1;
+                    this.ghosts[i].moved.x -= 1;
+                }
+                else if (this.ghosts[i].direction === 'up') {
+                    this.ghosts[i].y -= 1;
+                    this.ghosts[i].moved.y -= 1;
+                }
+                else if (this.ghosts[i].direction === 'down') {
+                    this.ghosts[i].y += 1;
+                    this.ghosts[i].moved.y += 1;
+                }
+            } else if (this.ghosts[i].moved.y === 0, this.ghosts[i].moved.x === 0) {
+                if (this.ghosts[i].direction == 'right' || this.ghosts[i].direction == 'left') {
+                    const DIRECTIONS = ['up', 'down'];
+                    do{
+                        var tempRandomInteger = Math.floor(Math.random() * 2);
+                        this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
+                    } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
+                } else if (this.ghosts[i].direction == 'up' || this.ghosts[i].direction == 'down') {
+                    const DIRECTIONS = ['right', 'left'];
+                    do{
+                        var tempRandomInteger = Math.floor(Math.random() * 2);
+                        this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
+                    } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
+                }
+            }           
+
+            // Reset values of moved
+            if (Math.abs(this.ghosts[i].moved.y) === 16) {
+                this.ghosts[i].moved.y = 0;
+            };
+            if (Math.abs(this.ghosts[i].moved.x) === 16) {
+                this.ghosts[i].moved.x = 0;
+            };
+        };
+
         // Rotates the PacMan
         if (this.pacman.direction.current === 'right') {
             this.pacman.angle = 0;
@@ -241,6 +298,9 @@
         }
         
         if (canMove(this.pacman.direction.current, this.pacman.moved.y, this.pacman.moved.x, collisionTiles)) {
+            if (moving === false) {
+                return false;
+            }
             if (this.pacman.direction.current === 'right') {
                 this.pacman.x += 1;
                 this.pacman.moved.x += 1;
@@ -260,9 +320,6 @@
         }
         
         function canMove(direction, movedY, movedX, collisionTiles) {
-            if (moving === false) {
-                return false;
-            }
             if (direction === 'up') {
                 if (((collisionTiles.current === 1 || collisionTiles.current === 3 || collisionTiles.current === 4 || collisionTiles.current === 9 || collisionTiles.current === 18 || collisionTiles.current === 23) && collisionTiles.currentRotation === 0) || ((collisionTiles.current === 9 || collisionTiles.current === 10) && collisionTiles.currentRotation > 4)) {
                     if ((movedY >= -16) && (movedY < 0)) {
