@@ -7,11 +7,14 @@ The code is written with scalability in mind. For example, someone can make a ne
 ## To-Do List
 - [x] Draw Ghosts
 - [ ] Make static OOP functions in seperate file
-- [ ] Add Ghosts etc
+- [x] Add Ghosts etc
+- [ ] Add Ghost prison variables
+- [ ] Add Ghost death
 - [ ] Menu
 - [ ] Sound
 - [ ] Display Score, Multipliers, Lifes etc
 - [ ] Highscores
 - [ ] Multiple levels
+- [ ] Add the portals
 ## To-Do Specialized List
 - [ ] Make Clearer Animation
