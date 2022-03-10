@@ -13,6 +13,9 @@
         this.load.image('strawberry', '../../assets/sprites/Strawberry.png');
         this.load.spritesheet('pacman', '../../assets/sprites/PacMan.png', { frameWidth: 85, frameHeight: 91});
         this.load.spritesheet('blinky', '../../assets/sprites/Blinky.png', { frameWidth: 85, frameHeight: 91});
+        this.load.spritesheet('clyde', '../../assets/sprites/Clyde.png', { frameWidth: 85, frameHeight: 91});
+        this.load.spritesheet('pinky', '../../assets/sprites/Pinky.png', { frameWidth: 85, frameHeight: 91});
+        this.load.spritesheet('inky', '../../assets/sprites/Inky.png', { frameWidth: 85, frameHeight: 91});
         this.load.tilemapTiledJSON('maze', '../../assets/mazes/default/pacman.json');
         this.load.json('levelData', '../../assets/mazes/default/data.json');
     }
@@ -38,18 +41,6 @@
             current : 'right'
         };
         
-        // Ghost sprites
-        this.blinky = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.prisonStartX)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, 'blinky');
-        this.blinky.displayWidth = SPRITE_WIDTH+1;
-        this.blinky.displayHeight = SPRITE_HEIGHT+1;
-        this.blinky.moved = {
-            x : 0,
-            y : 0,
-            lockedUp : true,
-            dead : false
-        };
-        this.blinky.direction = 'right';
-        
         // Animation sets
         this.anims.create({
             key: 'eat',
@@ -57,6 +48,70 @@
             yoyo: true,
             frameRate: 16
         });
+        
+        this.anims.create({
+            key: 'inkyIdle',
+            frames: this.anims.generateFrameNames('inky', {start: 0, end: 7}),
+            yoyo: true,
+            frameRate: 4,
+            repeat: -1
+        });
+        
+        this.anims.create({
+            key: 'clydeIdle',
+            frames: this.anims.generateFrameNames('clyde', {start: 0, end: 7}),
+            yoyo: true,
+            frameRate: 4,
+            repeat: -1
+        });
+        
+        this.anims.create({
+            key: 'pinkyIdle',
+            frames: this.anims.generateFrameNames('pinky', {start: 0, end: 7}),
+            yoyo: true,
+            frameRate: 4,
+            repeat: -1
+        });
+        
+        this.anims.create({
+            key: 'blinkyIdle',
+            frames: this.anims.generateFrameNames('blinky', {start: 0, end: 7}),
+            yoyo: true,
+            frameRate: 4,
+            repeat: -1
+        });
+
+        // Ghost sprites
+        this.ghosts = this.physics.add.group();
+        const divideBy4 = this.levelData.amountOfGhosts/4; // So there are almost the same amount of ghosts from a certain type
+        for (let i = 0; i < this.levelData.amountOfGhosts; i++) {
+            // Find random box in prison
+            var randomIntegerTemp = Math.floor(Math.random() * (this.levelData.prisonEndX - this.levelData.prisonStartX)) + this.levelData.prisonStartX;
+            if (i < divideBy4) {
+                var tempKey = 'inky';
+            } else if (i >= divideBy4 && i < divideBy4*2) {
+                var tempKey = 'clyde';
+            } else if (i >= divideBy4*2 && i < divideBy4*3) {
+                var tempKey = 'pinky';
+            } else {
+                var tempKey = 'blinky';
+            }
+            var temp = this.physics.add.sprite(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
+            temp.displayWidth = SPRITE_WIDTH + 1;
+            temp.displayHeight = SPRITE_HEIGHT + 1;
+            temp.moved = {
+                x : 0,
+                y : 0,
+                lockedUp : true,
+                dead : false
+            };
+            temp.play(tempKey+'Idle');
+            if (i % 2 === 0){
+                temp.direction = 'right';
+            } else {
+                temp.direction = 'left';
+            }
+        }
 
         this.points = this.physics.add.group();
 
@@ -139,7 +194,7 @@
         if (this.pacman.direction.current === 'up' && this.pacman.angle != -90) {
             this.pacman.angle = -90;
         }else if (this.pacman.direction.current === 'down' && this.pacman.angle != 90) {
-            this.pacman.angle = 90
+            this.pacman.angle = 90;
         }
 
         // After 16 moved it means that we traveled a full box
@@ -184,8 +239,8 @@
             }
             else if (((this.pacman.direction.next === 'up') || (this.pacman.direction.next === 'down')) && (this.pacman.moved.y === 0) && (this.pacman.moved.x === 0)) {
                 if (canMove(this.pacman.direction.next, this.pacman.moved.y, this.pacman.moved.x, collisionTiles)) {
-                    this.pacman.direction.current = this.pacman.direction.next
-                    this.pacman.moved.y = 0
+                    this.pacman.direction.current = this.pacman.direction.next;
+                    this.pacman.moved.y = 0;
                 }
             }
         }
@@ -221,7 +276,7 @@
                         return false;
                     }
                 } else {
-                    return true
+                    return true;
                 }
             } else if (direction === 'down') {
                 if (((collisionTiles.down === 3 || collisionTiles.down === 4 || collisionTiles.down === 15 || collisionTiles.down === 16 || collisionTiles.down === 18 || collisionTiles.down === 1 || collisionTiles.down === 24 || collisionTiles.down === 25 || collisionTiles.down === 26 || collisionTiles.down === 27 || collisionTiles.down === 28) && collisionTiles.downRotation === 0) || ((collisionTiles.down === 9 || collisionTiles.down === 10) && collisionTiles.downRotation > 4)) {
