@@ -16,6 +16,7 @@
         this.load.spritesheet('clyde', '../../assets/sprites/Clyde.png', { frameWidth: 85, frameHeight: 91});
         this.load.spritesheet('pinky', '../../assets/sprites/Pinky.png', { frameWidth: 85, frameHeight: 91});
         this.load.spritesheet('inky', '../../assets/sprites/Inky.png', { frameWidth: 85, frameHeight: 91});
+        this.load.spritesheet('scared', '../../assets/sprites/Scared.png', { frameWidth: 85, frameHeight: 91});
         this.load.tilemapTiledJSON('maze', '../../assets/mazes/default/pacman.json');
         this.load.json('levelData', '../../assets/mazes/default/data.json');
     }
@@ -48,6 +49,13 @@
             frameRate: 16
         });
 
+        this.anims.create({
+            key: 'scaredIdle',
+            frames: this.anims.generateFrameNames('scared', {start: 0, end: 7}),
+            yoyo: true,
+            frameRate: 4,
+            repeat: -1
+        });
         this.anims.create({
             key: 'inkyIdle',
             frames: this.anims.generateFrameNames('inky', {start: 0, end: 7}),
@@ -82,17 +90,22 @@
         this.ghosts = new Array(this.levelData.amountOfGhosts)
         const divideBy4 = this.ghosts.length/4; // So there are almost the same amount of ghosts from a certain type
         for (let i = 0; i < this.ghosts.length; i++) {
+        window.addEventListener('keydown', (e) => { //for testing
+            console.log(e.keyCode) //72 = H
+            if (e.keyCode == 72) this.ghosts[i].state.scared = !this.ghosts[i].state.scared;
+        });
             // Find random box in prison
             var randomIntegerTemp = Math.floor(Math.random() * (this.levelData.prisonEndX - this.levelData.prisonStartX)) + this.levelData.prisonStartX;
             // Divide No# of ghosts by 4 so there are 4 of the same with a chance to be 1 less blinky than the others, for example if 7 ghosts 2*inky...1*blinky
+            var tempKey
             if (i < divideBy4) {
-                var tempKey = 'inky';
+                tempKey = 'inky';
             } else if (i >= divideBy4 && i < divideBy4*2) {
-                var tempKey = 'clyde';
+                tempKey = 'clyde';
             } else if (i >= divideBy4*2 && i < divideBy4*3) {
-                var tempKey = 'pinky';
+                tempKey = 'pinky';
             } else {
-                var tempKey = 'blinky';
+                tempKey = 'blinky';
             }
             // Use temp for temporary holder for the sprite
             var temp = this.ghostGroup.create(this.map.tileToWorldX(randomIntegerTemp)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.prisonY)+SPRITE_HEIGHT, tempKey);
@@ -102,11 +115,15 @@
                 x : 0,
                 y : 0
             };
+            temp.key = tempKey;
             temp.state = {
-                free : false,
+                free : true,
                 soonFree : false,
-                dead : false
+                scared : false,
+                dead : false,
+                animation : 'default'
             };
+            temp.speed = 1;
             temp.play(tempKey+'Idle');
             if (Math.floor(Math.random()*2) === 1){ // 50% chance for each direction to start
                 temp.direction = 'right';
@@ -193,6 +210,16 @@
                 this.ghosts[i].state.soonFree = true;
                 setTimeout(() => {this.ghosts[i].state.free = true}, 5000);
             }
+            // Check if the animation is set, otherwise it will reset it before it loops
+            if (this.ghosts[i].state.scared && this.ghosts[i].state.animation != 'scared') {
+                this.ghosts[i].play('scaredIdle');
+                this.ghosts[i].state.animation = 'scared';
+                this.ghosts[i].speed = 0.5;
+            } else if (this.ghosts[i].state.animation === 'scared' && !this.ghosts[i].state.scared) {
+                this.ghosts[i].play(this.ghosts[i].key + 'Idle');
+                this.ghosts[i].state.animation = 'default';
+                this.ghosts[i].speed = 1;
+            }
             var collisionTiles = {
                 current : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).index,
                 currentRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).rotation,
@@ -229,20 +256,20 @@
                         }
                     }
                     if (this.ghosts[i].direction === 'right') {
-                        this.ghosts[i].x += 1;
-                        this.ghosts[i].moved.x += 1;
+                        this.ghosts[i].x += this.ghosts[i].speed;
+                        this.ghosts[i].moved.x += this.ghosts[i].speed;
                     }
                     else if (this.ghosts[i].direction === 'left') {
-                        this.ghosts[i].x -= 1;
-                        this.ghosts[i].moved.x -= 1;
+                        this.ghosts[i].x -= this.ghosts[i].speed;
+                        this.ghosts[i].moved.x -= this.ghosts[i].speed;
                     }
                     else if (this.ghosts[i].direction === 'up') {
-                        this.ghosts[i].y -= 1;
-                        this.ghosts[i].moved.y -= 1;
+                        this.ghosts[i].y -= this.ghosts[i].speed;
+                        this.ghosts[i].moved.y -= this.ghosts[i].speed;
                     }
                     else if (this.ghosts[i].direction === 'down') {
-                        this.ghosts[i].y += 1;
-                        this.ghosts[i].moved.y += 1;
+                        this.ghosts[i].y += this.ghosts[i].speed;
+                        this.ghosts[i].moved.y += this.ghosts[i].speed;
                     }
                 } else if (this.ghosts[i].moved.y === 0, this.ghosts[i].moved.x === 0) {
                     // When not able to move in that direction, choose a random one but not one that is the opposite direction because it can look akward
@@ -270,17 +297,17 @@
                     }
                 }
                 if (this.ghosts[i].direction === 'right') {
-                    this.ghosts[i].x += 1;
-                    this.ghosts[i].moved.x += 1;
+                    this.ghosts[i].x += this.ghosts[i].speed;
+                    this.ghosts[i].moved.x += this.ghosts[i].speed;
                 } else if (this.ghosts[i].direction === 'left') {
-                    this.ghosts[i].x -= 1;
-                    this.ghosts[i].moved.x -= 1;
+                    this.ghosts[i].x -= this.ghosts[i].speed;
+                    this.ghosts[i].moved.x -= this.ghosts[i].speed;
                 } else if (this.pacman.direction.current === 'up') {
-                this.pacman.y -= 1;
-                this.pacman.moved.y -= 1;
+                this.pacman.y -= this.ghosts[i].speed;
+                this.pacman.moved.y -= this.ghosts[i].speed;
                 } else if (this.pacman.direction.current === 'down') {
-                    this.pacman.y += 1;
-                    this.pacman.moved.y += 1;
+                    this.pacman.y += this.ghosts[i].speed;
+                    this.pacman.moved.y += this.ghosts[i].speed;
                 }
             }
             // Reset values of moved
