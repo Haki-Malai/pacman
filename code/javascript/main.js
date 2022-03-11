@@ -29,7 +29,7 @@
         this.levelData = this.cache.json.get('levelData');
         
         // Pacman sprite
-        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt)+SPRITE_HEIGHT, 'pacman').setDepth(2);
+        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt+3)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt-2)+SPRITE_HEIGHT, 'pacman').setDepth(2);
         this.pacman.displayWidth = SPRITE_WIDTH;
         this.pacman.displayHeight = SPRITE_HEIGHT;
         this.pacman.moved = {
@@ -40,7 +40,7 @@
             next : 'right',
             current : 'right'
         };
-        
+        console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
         // Animation sets
         this.anims.create({
             key: 'eat',
@@ -107,13 +107,13 @@
                 dead : false
             };
             temp.play(tempKey+'Idle');
-            if (i % 2 === 0){
+            if (Math.floor(Math.random()*2) === 1){ // 50% chance for each direction to start
                 temp.direction = 'right';
             } else {
                 temp.direction = 'left';
             }
             this.ghosts[i] = temp;
-        };
+        }
 
         this.points = this.physics.add.group();
 
@@ -159,7 +159,7 @@
                     }
                 }
             }
-        };
+        }
 
         this.physics.add.overlap(this.pacman, this.points, eatPoint, null, this);
 
@@ -179,14 +179,14 @@
             }
         }
 
-        function eatPoint(pacman, point) { // Don't remove 'pacman' even if it's unused
+        function eatPoint(pacman, point) { // Causion! Don't remove 'pacman' even if it's unused!
             point.disableBody(true, true);
             this.pacman.play('eat');
         }
     }
     update(time, delta) {
         // Moves the ghosts
-        for (let i = 0; i < this.ghosts.length; i++){
+        for (let i = 0; i < this.ghosts.length; i++) {
             var collisionTiles = {
                 current : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).index,
                 currentRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).rotation,
@@ -195,8 +195,31 @@
                 down : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).index,
                 downRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).rotation
             };
-        
+            // Just like below, checks if it should ad to the sprites x or y
             if (canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles)) {
+                // Also change to turn change direction when possible and not only when it's necessery
+                if (this.ghosts[i].moved.y === 0 && this.ghosts[i].moved.x === 0) {
+                    if (collisionTiles.current === 2 && (collisionTiles.currentRotation === 0 || collisionTiles.currentRotation === 4.71238898038469)) {
+                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
+                            this.ghosts[i].direction = 'up';
+                        }
+                    }
+                    if ((collisionTiles.down === 18 && collisionTiles.downRotation === 4.71238898038469) || (collisionTiles.down === 2 && collisionTiles.downRotation === 0)) {
+                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
+                            this.ghosts[i].direction = 'down';
+                        }
+                    }
+                    if ((collisionTiles.current === 19 && collisionTiles.currentRotation === 0)) {
+                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
+                            this.ghosts[i].direction = 'left';
+                        }
+                    }
+                    if ((collisionTiles.right === 18 && collisionTiles.rightRotation === 0)) {
+                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
+                            this.ghosts[i].direction = 'right';
+                        }
+                    }
+                }
                 if (this.ghosts[i].direction === 'right') {
                     this.ghosts[i].x += 1;
                     this.ghosts[i].moved.x += 1;
@@ -214,6 +237,7 @@
                     this.ghosts[i].moved.y += 1;
                 }
             } else if (this.ghosts[i].moved.y === 0, this.ghosts[i].moved.x === 0) {
+                // When not able to move in that direction, choose a random one but not one that is the opposite direction because it can look akward
                 if (this.ghosts[i].direction == 'right' || this.ghosts[i].direction == 'left') {
                     const DIRECTIONS = ['up', 'down'];
                     do{
@@ -232,11 +256,11 @@
             // Reset values of moved
             if (Math.abs(this.ghosts[i].moved.y) === 16) {
                 this.ghosts[i].moved.y = 0;
-            };
+            }
             if (Math.abs(this.ghosts[i].moved.x) === 16) {
                 this.ghosts[i].moved.x = 0;
-            };
-        };
+            }
+        }
 
         // Rotates the PacMan
         if (this.pacman.direction.current === 'right') {
@@ -250,15 +274,15 @@
             this.pacman.angle = -90;
         } else if (this.pacman.direction.current === 'down' && this.pacman.angle != 90) {
             this.pacman.angle = 90;
-        };
+        }
 
         // After 16 moved it means that we traveled a full box
         if (Math.abs(this.pacman.moved.y) === 16) {
             this.pacman.moved.y = 0;
-        };
+        }
         if (Math.abs(this.pacman.moved.x) === 16) {
             this.pacman.moved.x = 0;
-        };
+        }
         
         // Here the direction is set. Only one direction is saved, i find it necessery to save it on an array
         if (this.cursors.left.isDown) {
@@ -269,7 +293,7 @@
             this.pacman.direction.next = 'up';
         } else if (this.cursors.down.isDown) {
             this.pacman.direction.next = 'down'; 
-        };
+        }
         
         // Those are needed for checking collision
         var collisionTiles = {
@@ -279,7 +303,7 @@
             rightRotation : this.layer.getTileAtWorldXY(this.pacman.x + 16, this.pacman.y, true, this.camera).rotation,
             down : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y + 16, true, this.camera).index,
             downRotation : this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y + 16, true, this.camera).rotation
-        }
+        };
         
         // Here we check if we can set the current direction same to the next
         if (this.pacman.direction.current != this.pacman.direction.next) {
@@ -365,9 +389,9 @@
     }
 }
 
-var moving = false
+var moving = false;
 
-window.addEventListener("click", () => moving = !moving)
+window.addEventListener("click", () => moving = !moving);
 
 const config = {
     type: Phaser.WEBGL,
@@ -387,5 +411,5 @@ const config = {
     },
     pixelArt: true,
     scene: [ Game ]
-}
+};
 const GAME = new Phaser.Game(config);
