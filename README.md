@@ -8,7 +8,7 @@ The code is written with scalability in mind. For example, someone can make a ne
 - [x] Draw Ghosts
 - [ ] Make static OOP functions in seperate file
 - [x] Add Ghosts etc
-- [ ] Add Ghost prison variables
+- [x] Add Ghost prison variables
 - [ ] Add Ghost death
 - [ ] Menu
 - [ ] Sound

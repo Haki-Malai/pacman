@@ -29,7 +29,7 @@
         this.levelData = this.cache.json.get('levelData');
         
         // Pacman sprite
-        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt+3)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt-2)+SPRITE_HEIGHT, 'pacman').setDepth(2);
+        this.pacman = this.physics.add.sprite(this.map.tileToWorldX(this.levelData.startsXAt)+SPRITE_WIDTH, this.map.tileToWorldY(this.levelData.startsYAt)+SPRITE_HEIGHT, 'pacman').setDepth(2);
         this.pacman.displayWidth = SPRITE_WIDTH;
         this.pacman.displayHeight = SPRITE_HEIGHT;
         this.pacman.moved = {
@@ -40,7 +40,6 @@
             next : 'right',
             current : 'right'
         };
-        console.log(this.layer.getTileAtWorldXY(this.pacman.x, this.pacman.y, true, this.camera).index)
         // Animation sets
         this.anims.create({
             key: 'eat',
@@ -85,6 +84,7 @@
         for (let i = 0; i < this.ghosts.length; i++) {
             // Find random box in prison
             var randomIntegerTemp = Math.floor(Math.random() * (this.levelData.prisonEndX - this.levelData.prisonStartX)) + this.levelData.prisonStartX;
+            // Divide No# of ghosts by 4 so there are 4 of the same with a chance to be 1 less blinky than the others, for example if 7 ghosts 2*inky...1*blinky
             if (i < divideBy4) {
                 var tempKey = 'inky';
             } else if (i >= divideBy4 && i < divideBy4*2) {
@@ -103,7 +103,8 @@
                 y : 0
             };
             temp.state = {
-                lockedUp : true,
+                free : false,
+                soonFree : false,
                 dead : false
             };
             temp.play(tempKey+'Idle');
@@ -185,8 +186,13 @@
         }
     }
     update(time, delta) {
+        const WEIRD_TILE_ROTATION = 4.71238898038469;
         // Moves the ghosts
         for (let i = 0; i < this.ghosts.length; i++) {
+            if (moving && !this.ghosts[i].state.soonFree) {
+                this.ghosts[i].state.soonFree = true;
+                setTimeout(() => {this.ghosts[i].state.free = true}, 5000);
+            }
             var collisionTiles = {
                 current : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).index,
                 currentRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y, true, this.camera).rotation,
@@ -195,64 +201,88 @@
                 down : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).index,
                 downRotation : this.layer.getTileAtWorldXY(this.ghosts[i].x, this.ghosts[i].y + 16, true, this.camera).rotation
             };
-            // Just like below, checks if it should ad to the sprites x or y
-            if (canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles)) {
-                // Also change to turn change direction when possible and not only when it's necessery
+            // Check if the ghost is in jail...
+            if (this.ghosts[i].state.free) {
+                // Just like below, checks if it should ad to the sprites x or y
+                if (canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles)) {
+                    // Also change to turn change direction when possible and not only when it's necessery
+                    if (this.ghosts[i].moved.y === 0 && this.ghosts[i].moved.x === 0) {
+                        if (collisionTiles.current === 2 && (collisionTiles.currentRotation === 0 || collisionTiles.currentRotation === WEIRD_TILE_ROTATION)) {
+                            if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
+                                this.ghosts[i].direction = 'up';
+                            }
+                        }
+                        if ((collisionTiles.down === 18 && collisionTiles.downRotation === WEIRD_TILE_ROTATION) || (collisionTiles.down === 2 && collisionTiles.downRotation === 0)) {
+                            if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
+                                this.ghosts[i].direction = 'down';
+                            }
+                        }
+                        if ((collisionTiles.current === 19 && collisionTiles.currentRotation === 0)) {
+                            if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
+                                this.ghosts[i].direction = 'left';
+                            }
+                        }
+                        if ((collisionTiles.right === 18 && collisionTiles.rightRotation === 0)) {
+                            if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
+                                this.ghosts[i].direction = 'right';
+                            }
+                        }
+                    }
+                    if (this.ghosts[i].direction === 'right') {
+                        this.ghosts[i].x += 1;
+                        this.ghosts[i].moved.x += 1;
+                    }
+                    else if (this.ghosts[i].direction === 'left') {
+                        this.ghosts[i].x -= 1;
+                        this.ghosts[i].moved.x -= 1;
+                    }
+                    else if (this.ghosts[i].direction === 'up') {
+                        this.ghosts[i].y -= 1;
+                        this.ghosts[i].moved.y -= 1;
+                    }
+                    else if (this.ghosts[i].direction === 'down') {
+                        this.ghosts[i].y += 1;
+                        this.ghosts[i].moved.y += 1;
+                    }
+                } else if (this.ghosts[i].moved.y === 0, this.ghosts[i].moved.x === 0) {
+                    // When not able to move in that direction, choose a random one but not one that is the opposite direction because it can look akward
+                    if (this.ghosts[i].direction == 'right' || this.ghosts[i].direction == 'left') {
+                        const DIRECTIONS = ['up', 'down'];
+                        do{
+                            var tempRandomInteger = Math.floor(Math.random() * 2);
+                            this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
+                        } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
+                    } else if (this.ghosts[i].direction == 'up' || this.ghosts[i].direction == 'down') {
+                        const DIRECTIONS = ['right', 'left'];
+                        do{
+                            var tempRandomInteger = Math.floor(Math.random() * 2);
+                            this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
+                        } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
+                    }
+                }           
+            } else {  // Jail movement
                 if (this.ghosts[i].moved.y === 0 && this.ghosts[i].moved.x === 0) {
-                    if (collisionTiles.current === 2 && (collisionTiles.currentRotation === 0 || collisionTiles.currentRotation === 4.71238898038469)) {
-                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
-                            this.ghosts[i].direction = 'up';
-                        }
+                    if (collisionTiles.current === 15 && collisionTiles.currentRotation === 0 && this.ghosts[i].direction === 'left') {
+                        this.ghosts[i].direction = 'right';
                     }
-                    if ((collisionTiles.down === 18 && collisionTiles.downRotation === 4.71238898038469) || (collisionTiles.down === 2 && collisionTiles.downRotation === 0)) {
-                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
-                            this.ghosts[i].direction = 'down';
-                        }
-                    }
-                    if ((collisionTiles.current === 19 && collisionTiles.currentRotation === 0)) {
-                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 0) {
-                            this.ghosts[i].direction = 'left';
-                        }
-                    }
-                    if ((collisionTiles.right === 18 && collisionTiles.rightRotation === 0)) {
-                        if (Math.floor(Math.random()*2) === 1 && i % 2 === 1) {
-                            this.ghosts[i].direction = 'right';
-                        }
+                    if (collisionTiles.right === 10 && collisionTiles.rightRotation === WEIRD_TILE_ROTATION && this.ghosts[i].direction === 'right') {
+                        this.ghosts[i].direction = 'left';
                     }
                 }
                 if (this.ghosts[i].direction === 'right') {
                     this.ghosts[i].x += 1;
                     this.ghosts[i].moved.x += 1;
-                }
-                else if (this.ghosts[i].direction === 'left') {
+                } else if (this.ghosts[i].direction === 'left') {
                     this.ghosts[i].x -= 1;
                     this.ghosts[i].moved.x -= 1;
+                } else if (this.pacman.direction.current === 'up') {
+                this.pacman.y -= 1;
+                this.pacman.moved.y -= 1;
+                } else if (this.pacman.direction.current === 'down') {
+                    this.pacman.y += 1;
+                    this.pacman.moved.y += 1;
                 }
-                else if (this.ghosts[i].direction === 'up') {
-                    this.ghosts[i].y -= 1;
-                    this.ghosts[i].moved.y -= 1;
-                }
-                else if (this.ghosts[i].direction === 'down') {
-                    this.ghosts[i].y += 1;
-                    this.ghosts[i].moved.y += 1;
-                }
-            } else if (this.ghosts[i].moved.y === 0, this.ghosts[i].moved.x === 0) {
-                // When not able to move in that direction, choose a random one but not one that is the opposite direction because it can look akward
-                if (this.ghosts[i].direction == 'right' || this.ghosts[i].direction == 'left') {
-                    const DIRECTIONS = ['up', 'down'];
-                    do{
-                        var tempRandomInteger = Math.floor(Math.random() * 2);
-                        this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
-                    } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
-                } else if (this.ghosts[i].direction == 'up' || this.ghosts[i].direction == 'down') {
-                    const DIRECTIONS = ['right', 'left'];
-                    do{
-                        var tempRandomInteger = Math.floor(Math.random() * 2);
-                        this.ghosts[i].direction = DIRECTIONS[tempRandomInteger];
-                    } while (!canMove(this.ghosts[i].direction, this.ghosts[i].moved.y, this.ghosts[i].moved.x, collisionTiles));
-                }
-            }           
-
+            }
             // Reset values of moved
             if (Math.abs(this.ghosts[i].moved.y) === 16) {
                 this.ghosts[i].moved.y = 0;
